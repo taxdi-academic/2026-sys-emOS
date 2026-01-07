@@ -1,5 +1,5 @@
 
-# Mini OS — Résumé d'implémentation (version révisée)
+# Mini OS — Résumé d'implémentation 
 
 **Objectif**
 
