@@ -1,0 +1,40 @@
+version: '3.8'
+
+networks:
+  crypto_network:
+    driver: bridge
+
+services:
+  # Le registre local pour stocker tes images
+  registry:
+    image: registry:2
+    ports:
+      - "5555:5000"
+    restart: always
+    networks:
+      - crypto_network
+
+  # Container 1 : Sourcing
+  c1_initiator:
+    build: ./c1_initiator
+    image: localhost:5555/c1_initiator
+    container_name: c1_initiator
+    ports:
+      - "5003:5003" # Reçoit le mot final de C4
+    depends_on:
+      - c2_caesar
+    networks:
+      - crypto_network
+
+  # Container 2 : César (+5)
+  c2_caesar:
+    build: ./c2_caesar
+    image: localhost:5555/c2_caesar
+    container_name: c2_caesar
+    ports:
+      - "5000:5000" # Reçoit de C1
+    environment:
+      - VM1_IP=192.168.200.24
+      - VM2_IP=192.168.200.20
+    networks:
+      - crypto_network

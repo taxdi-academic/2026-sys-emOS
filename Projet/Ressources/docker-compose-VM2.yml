@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  c3_xor:
+    image: 192.168.200.24:5555/c3_xor
+    container_name: c3_xor
+    ports:
+      - "5001:5001"
+    environment:
+      - VM2_IP=192.168.200.20
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+
+  c4_decipher:
+    image: 192.168.200.24:5555/c4_decipher
+    container_name: c4_decipher
+    ports:
+      - "5002:5002"
+    environment:
+      - VM1_IP=192.168.200.24
+    cap_add:
+      - NET_ADMIN
+    privileged: true
