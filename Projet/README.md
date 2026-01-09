@@ -39,4 +39,8 @@ Il y a en tout 4 relais :
 
 Bien que l'UDP soit possible, le TCP est recommandé ici car le chiffrement XOR sur des flux binaires supporte mal la perte de paquets ou le désordre.
 
+---
+
+**Notes :** Dans ce projet, la VM1 correspond à la VM sous linux sans GUI. La VM2 quand à elle, correspond à la VM linux avec GUI
+
 
