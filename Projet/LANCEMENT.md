@@ -35,11 +35,8 @@ done
 # Vérification du catalogue
 curl http://localhost:5555/v2/_catalog
 ```
-## 3. Lancement des Services Locaux (VM1)
 
-Une fois les images dans le registry, lancez les deux premiers maillons de la chaîne : ```docker compose up -d c1_initiator c2_caesar```
-
-## 4. Déploiement à distance (VM2)
+## 3. Déploiement à distance (VM2)
 
 Sur la VM2, nous téléchargeons les images finies depuis la VM1.
 
@@ -50,8 +47,11 @@ docker compose down
 # Récupération des nouvelles images via le réseau
 docker compose pull
 # Lancement de C3 et C4
-docker compose up -d
+docker compose -f docker-compose.yml up
 ```
+## 4. Lancement des Services Locaux (VM1)
+
+Une fois les images dans le registry, lancez les deux premiers maillons de la chaîne : ```docker compose -f docker-compose.yml up```
 
 ## 5. Commandes de Diagnostic (Logs)
 
