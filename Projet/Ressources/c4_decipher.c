@@ -2,11 +2,16 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <errno.h>
+
+#define MAX 128
+
+/* ----------- CESAR ----------- */
 
 char caesar(char c, int shift) {
     if (c >= 'a' && c <= 'z')
         return 'a' + (c - 'a' + shift + 26) % 26;
-    if (c >= 'A' && c <= 'Z') // Support des majuscules
+    if (c >= 'A' && c <= 'Z')
         return 'A' + (c - 'A' + shift + 26) % 26;
     return c;
 }
@@ -16,18 +21,28 @@ void caesar_cipher(char *s, int shift) {
         s[i] = caesar(s[i], shift);
 }
 
+/* ----------- XOR ----------- */
+
 void xor_cipher(unsigned char *buf, int len) {
-    char key[] = "Nirvana"; // Attention à la casse "Nirvana" vs "nirvana" (doit être identique à C3)
+    const char key[] = "Nirvana";
     int klen = strlen(key);
     for (int i = 0; i < len; i++)
         buf[i] ^= key[i % klen];
 }
 
-int main() {
-    unsigned char buffer[128];
+/* ----------- MAIN ----------- */
 
-    // --- SERVEUR : Reçoit de C3 (VM2 Port 5002) ---
+int main() {
+    unsigned char buffer[MAX];
+
+    /* ===== SERVEUR : reçoit depuis C3 ===== */
+
     int server = socket(AF_INET, SOCK_STREAM, 0);
+    if (server < 0) {
+        perror("[C4] socket server");
+        return 1;
+    }
+
     int opt = 1;
     setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
@@ -36,47 +51,66 @@ int main() {
     local.sin_port = htons(5002);
     local.sin_addr.s_addr = INADDR_ANY;
 
-    bind(server, (struct sockaddr*)&local, sizeof(local));
+    if (bind(server, (struct sockaddr*)&local, sizeof(local)) < 0) {
+        perror("[C4] bind");
+        return 1;
+    }
+
     listen(server, 1);
 
     printf("[C4] En attente de C3 sur le port 5002...\n");
     int client = accept(server, NULL, NULL);
-    int len = recv(client, buffer, sizeof(buffer)-1, 0);
+    if (client < 0) {
+        perror("[C4] accept");
+        return 1;
+    }
 
-    // --- DECHIFFREMENT ---
+    int len = recv(client, buffer, MAX, 0);
+    if (len <= 0) {
+        perror("[C4] recv");
+        close(client);
+        close(server);
+        return 1;
+    }
+
+    /* ===== DECHIFFREMENT ===== */
+
     xor_cipher(buffer, len);
-    buffer[len] = 0; // On peut remettre le null-terminator ici car le XOR est fini
+    buffer[len] = 0;              // terminé APRÈS XOR
     caesar_cipher((char*)buffer, -5);
+
     printf("[C4] Mot déchiffré : %s\n", buffer);
 
-    // --- CLIENT : Retourne à C1 (Sur VM1 Port 5003) ---
+    close(client);
+    close(server);
+
+    /* ===== CLIENT : renvoi vers C1 ===== */
+
     int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        perror("[C4] socket client");
+        return 1;
+    }
+
     struct sockaddr_in c1 = {0};
     c1.sin_family = AF_INET;
     c1.sin_port = htons(5003);
-    
-    // IP de VM1 où C1 est exposé
-    c1.sin_addr.s_addr = inet_addr("192.168.200.24"); 
 
-    printf("[C4] Renvoi du résultat à C1 (VM1) sur 192.168.200.24:5003...\n");
-    int retries = 0;
-    while(connect(sock, (struct sockaddr*)&c1, sizeof(c1)) < 0) {
-        retries++;
-        printf("[C4] Tentative de connexion échouée (#%d), nouvelle tentative dans 2s...\n", retries);
+    if (inet_pton(AF_INET, "192.168.200.24", &c1.sin_addr) != 1) {
+        perror("[C4] inet_pton");
+        return 1;
+    }
+
+    printf("[C4] Connexion à C1 (192.168.200.24:5003)...\n");
+
+    while (connect(sock, (struct sockaddr*)&c1, sizeof(c1)) < 0) {
+        perror("[C4] connexion C1");
         sleep(2);
-        if (retries > 30) {
-            fprintf(stderr, "[C4] ERREUR : Impossible de se connecter à C1 après 30 tentatives\n");
-            break;
-        }
     }
-    
-    if (retries <= 30) {
-        send(sock, buffer, strlen((char*)buffer), 0);
-        printf("[C4] Résultat envoyé à C1 avec succès\n");
-    }
+
+    send(sock, buffer, strlen((char*)buffer), 0);
+    printf("[C4] Résultat renvoyé à C1\n");
 
     close(sock);
-    close(client);
-    close(server);
     return 0;
 }
