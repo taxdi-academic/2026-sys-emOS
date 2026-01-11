@@ -53,6 +53,8 @@ docker compose -f docker-compose.yml up
 
 Une fois les images dans le registry, lancez les deux premiers maillons de la chaîne : ```docker compose -f docker-compose.yml up```
 
+------
+
 ## 5. Commandes de Diagnostic (Logs)
 
 Pour surveiller le passage du "Mot choisi" à travers les conteneurs :
