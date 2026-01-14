@@ -9,7 +9,6 @@ L'intégralité du code source et des fichiers de configuration Docker se trouve
 ├── docker-compose.yml       # Orchestration Registry, C1 et C2
 ├── c1_initiator/
 │   ├── main.c               # Choix du mot et réception finale
-│   ├── dico.txt             # Liste des mots sources
 │   └── dockerfile           # Image basée sur gcc:latest
 ├── c2_caesar/
 │   ├── main.c               # Application du code César (+5)
