@@ -67,8 +67,8 @@ int main() {
     close(sock);
 
     // Attendre que le mot transite complètement dans la chaîne
-    printf("[C1] En attente de 5 secondes avant d'écouter le retour...\n");
-    sleep(5);
+    printf("[C1] En attente de 1 secondes avant d'écouter le retour...\n");
+    sleep(1);
 
     // --- ATTENTE DU RETOUR FINAL ---
     int server = socket(AF_INET, SOCK_STREAM, 0);
