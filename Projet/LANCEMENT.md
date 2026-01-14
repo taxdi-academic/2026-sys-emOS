@@ -1,4 +1,8 @@
-### 1. Démarrage du registry (VM1)
+# Guide de Lancement : Registry et Images Docker
+
+Ce document décrit les étapes pour compiler les images, les stocker dans le Registry local (VM1) et les déployer sur les deux machines.
+
+## 1. Démarrage du registry (VM1)
 
 ```bash
 cd ~/ProjetFinal
@@ -6,7 +10,7 @@ docker compose down
 docker compose up -d registry
 ```
 
-### 2. Build et push des images (VM1)
+## 2. Build et push des images (VM1)
 
 ```bash
 cd ~/ProjetFinal
@@ -18,7 +22,7 @@ for service in c1_initiator c2_caesar c3_xor c4_decipher; do
 done
 ```
 
-### 3. Déploiement sur la VM2
+## 3. Déploiement sur la VM2
 
 ```bash
 cd ~/ProjetFinal
@@ -27,13 +31,13 @@ docker compose pull
 docker compose -f docker-compose.yml up
 ```
 
-### 4. Lancement sur la VM1
+## 4. Lancement sur la VM1
 
 ```bash
 docker compose -f docker-compose.yml up
 ```
 
-### 5. Interaction avec le projet (ÉTAPE CLÉ)
+## 5. Interaction avec le projet (ÉTAPE CLÉ)
 
 Après le lancement sur la VM1 :
 
