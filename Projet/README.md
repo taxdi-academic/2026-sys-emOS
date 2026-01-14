@@ -43,6 +43,10 @@ Bien que l'UDP soit possible, le TCP est recommandé ici car le chiffrement XOR 
 
 ---
 
-**Notes :** Dans ce projet, la VM1 correspond à la VM sous linux sans GUI. La VM2 quand à elle, correspond à la VM linux avec GUI
+## Notes
+
+- VM1 : Linux sans interface graphique
+- VM2 : Linux avec interface graphique
+- Le projet repose entièrement sur Docker, TCP et des transformations cryptographiques simples.
 
 
