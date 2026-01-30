@@ -1,4 +1,4 @@
-# Ceci est un exemple de dockerfile. Il est similaire pour tous les dockers
+# This is an example dockerfile. It is similar for all dockers
 
 FROM gcc:latest AS builder
 WORKDIR /app
@@ -6,7 +6,7 @@ COPY main.c .
 RUN gcc -o c2_exec main.c
 
 FROM alpine:latest
-RUN apk add --no-cache libc6-compat # Nécessaire pour exécuter du C compilé avec gcc sur Alpine
+RUN apk add --no-cache libc6-compat # Necessary to run C compiled with gcc on Alpine
 WORKDIR /root/
 COPY --from=builder /app/c2_exec .
 CMD ["./c2_exec"]
