@@ -19,7 +19,7 @@ int ProcessManager::findFreeSlot(void) {
 
 int ProcessManager::createProcess(const char* name, user_program_fn func) {
     int slot = findFreeSlot();
-    if (slot == -1) return -1; // pas de slot libre
+    if (slot == -1) return -1; // no free slot
 
     processes[slot].pid = current_pid_counter++;
     processes[slot].name = name;
@@ -42,8 +42,8 @@ Process* ProcessManager::getProcess(int pid) {
 }
 
 void ProcessManager::listProcesses(void (*print_fn)(const char*)) {
-    print_fn("[Kernel] Processus actifs :\r\n");
-    print_fn("PID | Nom                | État       | CPU (ms)\r\n");
+    print_fn("[Kernel] Active processes:\r\n");
+    print_fn("PID | Name               | State      | CPU (ms)\r\n");
     print_fn("--- | --- | --- | ---\r\n");
 
     for (int i = 0; i < MAX_PROCESSES; i++) {
@@ -83,7 +83,7 @@ bool ProcessManager::killProcess(int pid) {
 }
 
 int ProcessManager::getNextRunnable(void) {
-    // Round-Robin : chercher le prochain processus RUNNING après last_scheduled_index
+    // Round-Robin: search for the next RUNNING process after last_scheduled_index
     int start = (last_scheduled_index + 1) % MAX_PROCESSES;
     for (int i = 0; i < MAX_PROCESSES; i++) {
         int idx = (start + i) % MAX_PROCESSES;
@@ -92,7 +92,7 @@ int ProcessManager::getNextRunnable(void) {
             return processes[idx].pid;
         }
     }
-    return -1; // aucun processus exécutable
+    return -1; // no executable process
 }
 
 int ProcessManager::countActive(void) {

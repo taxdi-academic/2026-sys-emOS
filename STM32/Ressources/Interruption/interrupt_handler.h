@@ -1,11 +1,11 @@
 #pragma once
 #include <Arduino.h>
 
-// Variable globale indiquant si une interruption a été déclenchée
+// Global variable indicating if an interrupt has been triggered
 extern volatile bool interrupted;
 
-// Initialise la gestion d’interruption
+// Initialize interrupt handling
 void initInterruptHandler();
 
-// Vérifie périodiquement si un Ctrl+C a été reçu
+// Periodically check if Ctrl+C has been received
 void checkInterrupt();

@@ -8,17 +8,17 @@ class Scheduler {
 public:
     Scheduler(ProcessManager* pm);
 
-    // Exécuter un timeslice pour le processus courant
-    // Retourne true si un processus a eu du CPU, false sinon
+    // Execute a timeslice for the current process
+    // Returns true if a process got CPU time, false otherwise
     bool tick(unsigned long timeslice_ms, void (*print_fn)(const char*));
 
-    // Passer au processus suivant dans la queue
+    // Switch to the next process in the queue
     void switchContext(void);
 
-    // Obtenir le PID du processus courant en exécution
+    // Get the PID of the current running process
     int getCurrentPid(void);
 
-    // Démarrer la boucle d'ordonnancement
+    // Start the scheduling loop
     void run(void (*print_fn)(const char*));
 
 private:

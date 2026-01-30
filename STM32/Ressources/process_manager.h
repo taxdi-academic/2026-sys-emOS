@@ -3,70 +3,70 @@
 
 #include <Arduino.h>
 
-// Pointeur sur fonction utilisateur (signature standard)
+// Pointer to user function (standard signature)
 typedef void (*user_program_fn)(void (*print_fn)(const char*));
 
-// États possibles d'un processus
+// Possible process states
 enum ProcessState {
-    PS_EMPTY,       // slot vide
-    PS_RUNNING,     // en cours d'exécution
-    PS_SUSPENDED,   // suspendu (pause)
-    PS_ZOMBIE       // terminé, en attente de nettoyage
+    PS_EMPTY,       // empty slot
+    PS_RUNNING,     // running
+    PS_SUSPENDED,   // suspended (pause)
+    PS_ZOMBIE       // terminated, waiting for cleanup
 };
 
-// Structure pour gérer un processus
+// Structure to manage a process
 struct Process {
     int pid;                           // process ID
-    const char* name;                  // nom du programme
-    user_program_fn func;              // pointeur sur la fonction du programme
-    ProcessState state;                // état actuel
-    unsigned long created_time;        // timestamp de création
-    unsigned long last_scheduled_time; // dernière fois qu'il a eu du CPU
-    unsigned long total_runtime_ms;    // temps total d'exécution (ms)
+    const char* name;                  // program name
+    user_program_fn func;              // pointer to the program function
+    ProcessState state;                // current state
+    unsigned long created_time;        // creation timestamp
+    unsigned long last_scheduled_time; // last time it got CPU time
+    unsigned long total_runtime_ms;    // total execution time (ms)
 };
 
-// Classe de gestion des processus
+// Process management class
 class ProcessManager {
 public:
     static const int MAX_PROCESSES = 8;
 
     ProcessManager();
 
-    // Créer et lancer un nouveau processus
+    // Create and launch a new process
     int createProcess(const char* name, user_program_fn func);
 
-    // Récupérer un processus par PID
+    // Retrieve a process by PID
     Process* getProcess(int pid);
 
-    // Lister tous les processus actifs
+    // List all active processes
     void listProcesses(void (*print_fn)(const char*));
 
-    // Suspend un processus (pause)
+    // Suspend a process (pause)
     bool suspendProcess(int pid);
 
-    // Reprendre un processus en pause
+    // Resume a paused process
     bool resumeProcess(int pid);
 
-    // Terminer un processus
+    // Terminate a process
     bool killProcess(int pid);
 
-    // Obtenir le prochain processus à exécuter (Round-Robin)
+    // Get the next process to execute (Round-Robin)
     int getNextRunnable(void);
 
-    // Nombre de processus actifs (RUNNING ou SUSPENDED)
+    // Number of active processes (RUNNING or SUSPENDED)
     int countActive(void);
 
-    // Nombre de processus RUNNING
+    // Number of RUNNING processes
     int countRunning(void);
 
-    // Nettoyer les processus zombies
+    // Clean up zombie processes
     void cleanupZombies(void);
 
 private:
     Process processes[MAX_PROCESSES];
     int current_pid_counter;
-    int last_scheduled_index; // pour Round-Robin
-    
+    int last_scheduled_index; // for Round-Robin
+
     int findFreeSlot(void);
 };
 
