@@ -1,6 +1,6 @@
 #include "scheduler.h"
 
-// Volatile flag pour gérer l'interruption (setjmp/longjmp style)
+// Volatile flag to handle interruption (setjmp/longjmp style)
 volatile static bool interrupt_requested = false;
 volatile static int interrupt_target_pid = -1;
 
@@ -17,10 +17,10 @@ void Scheduler::switchContext(void) {
 
 bool Scheduler::tick(unsigned long timeslice_ms, void (*print_fn)(const char*)) {
     if (!pm || pm->countRunning() == 0) {
-        return false; // aucun processus exécutable
+        return false; // no executable process
     }
 
-    // Obtenir le prochain processus
+    // Get the next process
     switchContext();
     if (current_pid == -1) return false;
 
@@ -29,25 +29,25 @@ bool Scheduler::tick(unsigned long timeslice_ms, void (*print_fn)(const char*)) 
 
     slice_start_time = millis();
 
-    // Exécuter le processus pour au max timeslice_ms
-    // En pratique sur Arduino/STM32, on n'a pas de vrai preemption
-    // Donc on lance le programme et il doit coopérer (yield/delay)
+    // Execute the process for max timeslice_ms
+    // In practice on Arduino/STM32, we don't have true preemption
+    // So we launch the program and it must cooperate (yield/delay)
     p->func(print_fn);
 
     unsigned long elapsed = millis() - slice_start_time;
     p->total_runtime_ms += elapsed;
     p->last_scheduled_time = millis();
 
-    // Nettoyer les zombies
+    // Clean up zombies
     pm->cleanupZombies();
 
     return true;
 }
 
 void Scheduler::run(void (*print_fn)(const char*)) {
-    // Boucle principale du scheduler
+    // Main scheduler loop
     while (pm->countRunning() > 0) {
         tick(100, print_fn); // timeslice de 100ms (approx)
     }
-    print_fn("[Kernel] Tous les processus sont terminés.\r\n");
+    print_fn("[Kernel] All processes are completed.\r\n");
 }

@@ -1,8 +1,8 @@
-# Guide de Lancement : Registry et Images Docker
+# Launch Guide: Registry and Docker Images
 
-Ce document décrit les étapes pour compiler les images, les stocker dans le Registry local (VM1) et les déployer sur les deux machines.
+This document describes the steps to build images, store them in the local Registry (VM1), and deploy them on both machines.
 
-## 1. Démarrage du registry (VM1)
+## 1. Starting the registry (VM1)
 
 ```bash
 cd ~/ProjetFinal
@@ -10,7 +10,7 @@ docker compose down
 docker compose up -d registry
 ```
 
-## 2. Build et push des images (VM1)
+## 2. Build and push images (VM1)
 
 ```bash
 cd ~/ProjetFinal
@@ -22,7 +22,7 @@ for service in c1_initiator c2_caesar c3_xor c4_decipher; do
 done
 ```
 
-## 3. Déploiement sur la VM2
+## 3. Deployment on VM2
 
 ```bash
 cd ~/ProjetFinal
@@ -31,46 +31,46 @@ docker compose pull
 docker compose -f docker-compose.yml up
 ```
 
-## 4. Lancement sur la VM1
+## 4. Launch on VM1
 
 ```bash
 docker compose -f docker-compose.yml up
 ```
 
-## 5. Interaction avec le projet (ÉTAPE CLÉ)
+## 5. Interaction with the project (KEY STEP)
 
-Après le lancement sur la VM1 :
+After launching on VM1:
 
-1. **Ouvrir un nouveau terminal**
-2. Attacher le conteneur initiateur :
+1. **Open a new terminal**
+2. Attach the initiator container:
 ```bash
 docker attach c1_initiator
 ```
-3. **Appuyer deux fois sur Entrée**
-4. **Saisir les mots demandés**
+3. **Press Enter twice**
+4. **Enter the requested words**
 
-C’est à ce moment précis que l’interaction utilisateur a lieu.
+This is when user interaction takes place.
 
 ---
 
-## Commandes Utiles
+## Useful Commands
 
-* Logs du conteneur initiateur (sur la VM1) :
+* Initiator container logs (on VM1):
 ```bash
 docker logs -f c1_initiator
 ```
 
-* Logs du chiffrement César (sur la VM1) :
+* Caesar encryption logs (on VM1):
 ```bash
 docker logs -f c2_caesar
 ```
 
-* Logs du conteneur xor (sur la VM2) : 
+* XOR container logs (on VM2):
 ```bash
 docker logs -f c3_xor
 ```
 
-* Logs du conteneur decipher (sur la VM2) : 
+* Decipher container logs (on VM2):
 ```bash
 docker logs -f c4_decipher
 ```
@@ -79,6 +79,6 @@ docker logs -f c4_decipher
 
 ## Notes
 
-- VM1 : Linux sans interface graphique
-- VM2 : Linux avec interface graphique
-- Le projet repose entièrement sur Docker, TCP et des transformations cryptographiques simples.
+- VM1: Linux without graphical interface
+- VM2: Linux with graphical interface
+- The project relies entirely on Docker, TCP, and simple cryptographic transformations.

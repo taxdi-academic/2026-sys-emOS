@@ -1,69 +1,68 @@
-# Mini OS — Exemples d'utilisation (version révisée)
+# Mini OS — Usage Examples (revised version)
 
-Ce fichier contient des scénarios pas-à-pas pour utiliser le shell et le scheduler du mini OS.
+This file contains step-by-step scenarios to use the mini OS shell and scheduler.
 
-Exemple 1 — Lancer plusieurs processus et utiliser le scheduler
+Example 1 — Launch multiple processes and use the scheduler
 -------------------------------------------------------------
 
-1) Créer deux processus :
+1) Create two processes:
 
 ```
-shell> start 1         # prog2 (compteur 0..4)
+shell> start 1         # prog2 (counter 0..4)
 shell> start 7         # infiniteLoop
 ```
 
-2) Vérifier les processus :
+2) Check the processes:
 
 ```
 shell> ps
 ```
 
-3) Lancer l'ordonnanceur :
+3) Start the scheduler:
 
 ```
 shell> run
 ```
 
-Observations :
-- `prog2` exécutera ses itérations puis se terminera (ZOMBIE).
-- `infiniteLoop` continuera tant qu'on ne demande pas son arrêt.
-- Appuyez `Ctrl+C` dans le terminal pour demander l'arrêt coopératif (le programme doit appeler `kernel_yield()` pour être réactif).
+Observations:
+- `prog2` will execute its iterations then terminate (ZOMBIE).
+- `infiniteLoop` will continue until we request its stop.
+- Press `Ctrl+C` in the terminal to request cooperative stop (the program must call `kernel_yield()` to be responsive).
 
-Exemple 2 — Démarrer, suspendre et reprendre
+Example 2 — Start, suspend and resume
 --------------------------------------------
 
 ```
 shell> start 4         # morpionv3
 shell> start 5         # morpionv4
 shell> ps
-shell> suspend <pid>   # suspendre un PID obtenu via ps
+shell> suspend <pid>   # suspend a PID obtained via ps
 shell> resume <pid>
 ```
 
-Exemple 3 — Arrêter un processus bloquant
+Example 3 — Stop a blocking process
 -----------------------------------------
 
-1) Démarrer la tâche bloquante : `start 7` (infiniteLoop)
-2) Noter le PID via `ps`
-3) `kill <pid>` pour demander l'arrêt coopératif
+1) Start the blocking task: `start 7` (infiniteLoop)
+2) Note the PID via `ps`
+3) `kill <pid>` to request cooperative stop
 
-Le programme affichera un message d'arrêt et le scheduler nettoiera la table.
+The program will display a stop message and the scheduler will clean up the table.
 
-Exemple 4 — Scénario avancé (tests automatisés manuels)
+Example 4 — Advanced scenario (manual automated tests)
 -----------------------------------------------------
 
-- Enchaînez `start 1`, `start 7`, `run` puis dans un autre terminal exécutez `kill <pid>` pour observer la réaction asynchrone.
+- Chain `start 1`, `start 7`, `run` then in another terminal execute `kill <pid>` to observe the asynchronous reaction.
 
-Règles utiles
+Useful Rules
 ------------
 
-- `kernel_yield()` : les programmes cooperatifs doivent l'appeler régulièrement pour être préemptibles (déjà ajouté dans `infiniteLoop`).
-- `kill` marque un processus en `ZOMBIE` et déclenche le flag d'arrêt coopératif.
-- Le scheduler nettoie périodiquement les zombies.
+- `kernel_yield()`: cooperative programs must call it regularly to be preemptible (already added in `infiniteLoop`).
+- `kill` marks a process as `ZOMBIE` and triggers the cooperative stop flag.
+- The scheduler periodically cleans up zombies.
 
-Dépannage rapide
+Quick Troubleshooting
 ----------------
 
-- Aucun processus listé après `start` → Vérifier que `createProcess()` a renvoyé un PID valide.
-- `kill` sans effet → vérifier que le programme appelle `kernel_yield()` ou `delay()`.
-
+- No process listed after `start` → Check that `createProcess()` returned a valid PID.
+- `kill` has no effect → check that the program calls `kernel_yield()` or `delay()`.

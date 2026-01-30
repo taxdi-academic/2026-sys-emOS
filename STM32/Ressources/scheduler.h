@@ -3,7 +3,7 @@
 
 #include "process_manager.h"
 
-// Classe ordonnanceur (Round-Robin simple)
+// Scheduler class (simple Round-Robin)
 class Scheduler {
 public:
     Scheduler(ProcessManager* pm);

@@ -1,76 +1,75 @@
 
-# Mini OS — Résumé d'implémentation 
+# Mini OS — Implementation Summary
 
-**Objectif**
+**Objective**
 
-Ce document résume l'architecture et les choix d'implémentation du mini OS (STM32/QEMU).
+This document summarizes the architecture and implementation choices of the mini OS (STM32/QEMU).
 
-**Composants principaux**
+**Main Components**
 
 - `ProcessManager` (`include/process_manager.h`, `src/process_manager.cpp`)
-  - Table de processus (max 8). Chaque entrée contient : PID, nom, état, pointeur vers la fonction utilisateur, timestamps, compteur CPU.
-  - États : `PS_EMPTY`, `PS_RUNNING`, `PS_SUSPENDED`, `PS_ZOMBIE`.
-  - API : `createProcess()`, `getProcess()`, `killProcess()`, `suspendProcess()`, `resumeProcess()`, `getNextRunnable()`, `listProcesses()`, `cleanupZombies()`.
+  - Process table (max 8). Each entry contains: PID, name, state, pointer to user function, timestamps, CPU counter.
+  - States: `PS_EMPTY`, `PS_RUNNING`, `PS_SUSPENDED`, `PS_ZOMBIE`.
+  - API: `createProcess()`, `getProcess()`, `killProcess()`, `suspendProcess()`, `resumeProcess()`, `getNextRunnable()`, `listProcesses()`, `cleanupZombies()`.
 
 - `Scheduler` (`include/scheduler.h`, `src/scheduler.cpp`)
-  - Ordonnancement Round-Robin coopératif.
-  - `kernel_yield()` exposé aux programmes pour leur permettre de donner la main au kernel (détecte Ctrl+C et met `kernel_stop_requested`).
-  - `run()` lance la boucle d'ordonnancement : poll série, tick, cleanup.
+  - Cooperative Round-Robin scheduling.
+  - `kernel_yield()` exposed to programs to allow them to yield to the kernel (detects Ctrl+C and sets `kernel_stop_requested`).
+  - `run()` starts the scheduling loop: poll serial, tick, cleanup.
 
 - `main.cpp` (shell)
-  - Shell interactif simple pour manipuler la table de processus et démarrer l'ordonnanceur.
+  - Simple interactive shell to manipulate the process table and start the scheduler.
 
-**Comportement clé**
+**Key Behavior**
 
-- Les programmes utilisateur respectent une interface simple : `void prog(void (*print_fn)(const char*))`.
-- Le scheduler est coopératif : les programmes doivent appeler `kernel_yield()` ou utiliser `delay()` pour permettre au kernel de vérifier les entrées (Ctrl+C) et effectuer des actions.
+- User programs follow a simple interface: `void prog(void (*print_fn)(const char*))`.
+- The scheduler is cooperative: programs must call `kernel_yield()` or use `delay()` to allow the kernel to check inputs (Ctrl+C) and perform actions.
 
-**Comment le Round-Robin est réalisé**
+**How Round-Robin is Implemented**
 
-1. `ProcessManager::getNextRunnable()` parcourt la table (depuis `last_scheduled_index + 1`) et renvoie le PID du prochain processus en `PS_RUNNING`.
-2. Le scheduler appelle la fonction utilisateur associée ; le programme s'exécute et fait des yields périodiques.
-3. À la sortie, le scheduler met à jour les compteurs de temps CPU et nettoie les zombies.
+1. `ProcessManager::getNextRunnable()` traverses the table (from `last_scheduled_index + 1`) and returns the PID of the next process in `PS_RUNNING`.
+2. The scheduler calls the associated user function; the program executes and makes periodic yields.
+3. On exit, the scheduler updates CPU time counters and cleans up zombies.
 
-**Interruption coopérative**
+**Cooperative Interruption**
 
-- `kernel_stop_requested` (défini dans `scheduler.cpp`) est un flag lu par les programmes.
-- `kill(pid)` dans `ProcessManager` marque le processus en `PS_ZOMBIE` et déclenche le flag d'arrêt coopératif si nécessaire.
-- `kernel_yield()` permet de détecter Ctrl+C (ASCII 3) envoyé sur la console et de mettre `kernel_stop_requested = true`.
+- `kernel_stop_requested` (defined in `scheduler.cpp`) is a flag read by programs.
+- `kill(pid)` in `ProcessManager` marks the process as `PS_ZOMBIE` and triggers the cooperative stop flag if necessary.
+- `kernel_yield()` allows detection of Ctrl+C (ASCII 3) sent on the console and sets `kernel_stop_requested = true`.
 
-**Limitations et points d'amélioration**
+**Limitations and Improvement Points**
 
-- Pas de préemption matérielle : pour une vraie préemption il faut SysTick + context switch + sauvegarde des registres et piles par processus.
-- Chaque processus partage la même adresse mémoire (pas d'isolation) — risque d'interférences.
-- Les programmes doivent être coopératifs (appeler `kernel_yield()`).
+- No hardware preemption: for true preemption we need SysTick + context switch + register and stack saving per process.
+- Each process shares the same memory address (no isolation) — risk of interference.
+- Programs must be cooperative (call `kernel_yield()`).
 
-Améliorations futures :
+Future improvements:
 
-- Préemption matérielle (SysTick) + `setjmp()`/`longjmp()` pour sauvegarder le contexte.
-- Allouer une pile dédiée par processus et implémenter la commutation de contexte.
-- Ajouter IPC simple (queues, signaux) et gestion d'erreurs plus robuste.
+- Hardware preemption (SysTick) + `setjmp()`/`longjmp()` to save context.
+- Allocate a dedicated stack per process and implement context switching.
+- Add simple IPC (queues, signals) and more robust error handling.
 
-**Arborescence (chemin relatif : `Ressource_OS_STM32/OS-FunctionPrograms/`)**
+**Directory Structure (relative path: `Ressource_OS_STM32/OS-FunctionPrograms/`)**
 
 ```
 include/
-  ├── `process_manager.h`    (NEW)     - Gestion des processus (structure, API)
-  ├── `scheduler.h`          (NEW)     - Ordonnanceur Round-Robin (interface)
-  └── `kernel_api.h`         (NEW)     - API exposée aux programmes (`kernel_yield`, flag d'arrêt)
+  ├── `process_manager.h`    (NEW)     - Process management (structure, API)
+  ├── `scheduler.h`          (NEW)     - Round-Robin scheduler (interface)
+  └── `kernel_api.h`         (NEW)     - API exposed to programs (`kernel_yield`, stop flag)
 
 src/
-  ├── `main.cpp`             (MODIFIÉ) - Shell interactif + intégration ProcessManager/Scheduler
-  ├── `process_manager.cpp`  (NEW)     - Implémentation de la gestion des processus
-  ├── `scheduler.cpp`        (NEW)     - Implémentation du scheduler et `kernel_yield`
+  ├── `main.cpp`             (MODIFIED) - Interactive shell + ProcessManager/Scheduler integration
+  ├── `process_manager.cpp`  (NEW)     - Process management implementation
+  ├── `scheduler.cpp`        (NEW)     - Scheduler and `kernel_yield` implementation
   └── user_programs/
-      ├── `infiniteLoop.cpp` (MODIFIÉ) - Exemple infini, devenu coopératif (`kernel_yield`)
-      └── (autres programmes existants — p.ex. `prog1`, `prog2`, `morpionv3`, etc.)
+      ├── `infiniteLoop.cpp` (MODIFIED) - Infinite example, became cooperative (`kernel_yield`)
+      └── (other existing programs — e.g. `prog1`, `prog2`, `morpionv3`, etc.)
 
-lib/                         (EXISTANT) - Bibliothèques liées (inchangées)
+lib/                         (EXISTING) - Linked libraries (unchanged)
 
-platformio.ini               (EXISTANT) - Configuration PlatformIO (board, scripts pre/post)
+platformio.ini               (EXISTING) - PlatformIO configuration (board, pre/post scripts)
 
-scripts/                     (EXISTANT) - `pre-build-programs.py`, `post-qemu.py`
+scripts/                     (EXISTING) - `pre-build-programs.py`, `post-qemu.py`
 ```
 
-**Rappel** : ce système est pédagogique — il privilégie la simplicité et la compréhension des concepts d'ordonnancement et d'interruption coopérative.
-
+**Reminder**: this system is pedagogical — it favors simplicity and understanding of scheduling and cooperative interruption concepts.

@@ -16,30 +16,30 @@ int main() {
         printf("\n==========================================\n");
         printf("   PARTIE N° %d\n", compteur);
         printf("==========================================\n");
-        printf("[C1] Entrez le mot a envoyer (ou 'fin' pour quitter) : ");
+        printf("[C1] Enter the word to send (or 'fin' to quit): ");
 	fflush(stdout);
         
         if (fgets(word, MAX, stdin) == NULL) break;
         word[strcspn(word, "\n")] = 0;
 
-        // Condition d'arrêt
+        // Stop condition
         if (strcmp(word, "fin") == 0) {
-            compteur--; // On ne compte pas la partie "fin"
-            printf("\n[C1] Arret du programme demandé.\n");
+            compteur--; // Don't count the "fin" round
+            printf("\n[C1] Program stop requested.\n");
 	    fflush(stdout);
-            printf("[C1] Nombre total de parties realisees : %d\n", compteur);
+            printf("[C1] Total number of rounds completed: %d\n", compteur);
 	    fflush(stdout);
             break;
         }
 
         if (strlen(word) == 0) {
-            printf("[C1] Erreur : Le mot ne peut pas etre vide.\n");
+            printf("[C1] Error: The word cannot be empty.\n");
 	    fflush(stdout);
             compteur--;
             continue;
         }
 
-        // --- ENVOI VERS C2 ---
+        // --- SEND TO C2 ---
         int sock = socket(AF_INET, SOCK_STREAM, 0);
         struct sockaddr_in c2 = {0};
         c2.sin_family = AF_INET;
@@ -53,18 +53,18 @@ int main() {
         }
 
         if (connect(sock, (struct sockaddr*)&c2, sizeof(c2)) < 0) {
-            perror("[C1] Erreur connexion C2");
+            perror("[C1] C2 connection error");
 	    fflush(stdout);
             close(sock);
             continue;
         }
 
         send(sock, word, strlen(word), 0);
-        printf("[C1] Mot envoye à C2 : %s\n", word);
+        printf("[C1] Word sent to C2: %s\n", word);
 	fflush(stdout);
         close(sock);
 
-        // --- ATTENTE DU RETOUR FINAL ---
+        // --- WAITING FOR FINAL RETURN ---
         int server = socket(AF_INET, SOCK_STREAM, 0);
         int opt = 1;
         setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
@@ -75,21 +75,21 @@ int main() {
         local.sin_addr.s_addr = INADDR_ANY;
 
         if (bind(server, (struct sockaddr*)&local, sizeof(local)) < 0) {
-            perror("[C1] Erreur bind 5003");
+            perror("[C1] Bind error 5003");
 	    fflush(stdout);
             close(server);
             continue;
         }
         
         listen(server, 1);
-        printf("[C1] En attente du retour de la chaine...\n");
+        printf("[C1] Waiting for the string return...\n");
 	fflush(stdout);
 
         int client = accept(server, NULL, NULL);
         char buffer[MAX] = {0};
         recv(client, buffer, MAX, 0);
 
-        printf("[C1] >>> SUCCES ! Mot final recu : %s\n", buffer);
+        printf("[C1] >>> SUCCESS! Final word received: %s\n", buffer);
 	fflush(stdout);
 
         close(client);

@@ -26,18 +26,18 @@ int main() {
     bind(server, (struct sockaddr)&local, sizeof(local));
     listen(server, 5);
 
-    printf("[C3] En attente de données de VM1 (C2) sur le port 5001...\n");
+    printf("[C3] Waiting for data from VM1 (C2) on port 5001...\n");
     fflush(stdout);
 
-    while (1) { // Début de la boucle infinie
+    while (1) { // Start of infinite loop
         int client = accept(server, NULL, NULL);
         int len = recv(client, buffer, MAX, 0);
         if (len > 0) {
-            printf("[C3] Données reçues (longueur: %d)\n", len);
+            printf("[C3] Data received (length: %d)\n", len);
         fflush(stdout);
 
             xor_cipher(buffer, len, key);
-            printf("[C3] XOR appliqué avec la clé '%s'\n", key);
+            printf("[C3] XOR applied with key '%s'\n", key);
         fflush(stdout);
 
             int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -49,7 +49,7 @@ int main() {
             if (host) memcpy(&c4.sin_addr.s_addr, host->h_addr_list[0], host->h_length);
             else c4.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-            printf("[C3] Transmission à C4...\n");
+            printf("[C3] Transmitting to C4...\n");
         fflush(stdout);
 
             if (connect(sock, (struct sockaddr)&c4, sizeof(c4)) >= 0) {

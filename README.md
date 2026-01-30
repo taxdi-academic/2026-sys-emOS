@@ -1,21 +1,21 @@
-## TP : Linux / STM32 / Virtualisation
+## Lab: Linux / STM32 / Virtualization
 
-L'idée de ce TP basique est de faire en sorte de se familiariser avec les concepts des systèmes d'exploitation vus en cours ainsi que différentes solutions de virtualisation. Les objectifs pédagogiques sont :
+The purpose of this basic lab is to become familiar with operating system concepts covered in class as well as different virtualization solutions. The educational objectives are:
 
-- Proxmox : Installation / Configuration / Création de machine virtuelle
-- OS : Appels Systèmes (Strace), IPC, Systèmes de fichiers etc.
-- Docker : Commandes de base / Création d'un Dockerfile / Exemple d'utilisation concrète / Docker et la sécurité
-- Docker-compose : Exemple de composition de container
-- Vagrant (peut-être) : Déploiement et Orchestration de containers sur une machine virtuelle VirtualBox
+- Proxmox: Installation / Configuration / Virtual machine creation
+- OS: System Calls (Strace), IPC, File systems, etc.
+- Docker: Basic commands / Creating a Dockerfile / Concrete usage example / Docker and security
+- Docker-compose: Container composition example
+- Vagrant (maybe): Deployment and orchestration of containers on a VirtualBox virtual machine
 
-**Notre objectif est de mettre en place l'architecture ci-dessous et de réaliser un projet dans ce cadre :**
+**Our goal is to set up the architecture below and carry out a project within this framework:**
 
 <img width="2556" height="1849" alt="image" src="https://github.com/user-attachments/assets/1b3d8906-5ca4-4eed-ac5e-b3867fee91de" />
 
-Lors de ce TP, nous devrons tenir un journal de bord qui nous permettra de noter les points difficiles et de savoir où en sommes-nous rendus.
+During this lab, we will keep a logbook that will allow us to note difficult points and track our progress.
 
-Pour ce faire, nous allons nous restreindre à **3 règles d'or**:
+To do this, we will follow **3 golden rules**:
 
-- Sprint = 1 semaine. Livrable minimum à la fin de chaque sprint
-- Pas de scope creep : si ça dépasse, backlog.
-- Daily quick check (5 min) : ce qui a été fait / blocages / next step.	
+- Sprint = 1 week. Minimum deliverable at the end of each sprint
+- No scope creep: if it goes beyond, add to backlog.
+- Daily quick check (5 min): what was done / blockers / next step.	

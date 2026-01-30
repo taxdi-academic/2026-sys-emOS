@@ -36,10 +36,10 @@ int main() {
     bind(server, (struct sockaddr*)&local, sizeof(local));
     listen(server, 5);
 
-    printf("[C4] En attente de C3 sur le port 5002...\n");
+    printf("[C4] Waiting for C3 on port 5002...\n");
     fflush(stdout);
 
-    while (1) { // Début de la boucle infinie
+    while (1) { // Start of infinite loop
         int client = accept(server, NULL, NULL);
         int len = recv(client, buffer, MAX, 0);
         if (len > 0) {
@@ -47,7 +47,7 @@ int main() {
             buffer[len] = 0;
             caesar_cipher((char*)buffer, -5);
 
-            printf("[C4] Mot déchiffré : %s\n", buffer);
+            printf("[C4] Decrypted word: %s\n", buffer);
 	    fflush(stdout);
 
             int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -56,12 +56,12 @@ int main() {
             c1.sin_port = htons(5003);
             inet_pton(AF_INET, "192.168.200.24", &c1.sin_addr);
 
-            printf("[C4] Connexion à C1 (192.168.200.24:5003)...\n");
+            printf("[C4] Connecting to C1 (192.168.200.24:5003)...\n");
 	    fflush(stdout);
 
             if (connect(sock, (struct sockaddr*)&c1, sizeof(c1)) >= 0) {
                 send(sock, buffer, strlen((char*)buffer), 0);
-                printf("[C4] Résultat renvoyé à C1\n");
+                printf("[C4] Result sent back to C1\n");
             	fflush(stdout);
                 close(sock);
             }

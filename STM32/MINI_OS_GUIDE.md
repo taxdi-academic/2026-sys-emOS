@@ -1,89 +1,89 @@
-# Mini OS pour STM32 - Guide d'utilisation
+# Mini OS for STM32 - User Guide
 
-## Vue d'ensemble
+## Overview
 
-Ce mini OS implémente les 3 tâches requises :
+This mini OS implements the 3 required tasks:
 
-### 1. **Mécanisme d'interruption**
-- Les programmes qui tournent indéfiniment (ex: `infiniteLoop`) peuvent être arrêtés via la commande `kill <pid>`
-- Un processus interrompu passe à l'état `ZOMBIE` et est nettoyé automatiquement
+### 1. **Interrupt Mechanism**
+- Programs running indefinitely (e.g. `infiniteLoop`) can be stopped via the `kill <pid>` command
+- An interrupted process moves to the `ZOMBIE` state and is automatically cleaned up
 
-### 2. **Gestion multi-processus**
-- Shell interactif avec commandes pour créer, lister, suspendre et terminer les processus
-- Chaque processus a un PID unique et un état (RUNNING, SUSPENDED, ZOMBIE)
-- Possibilité de basculer entre processus sans "tâche de fond" (mode mono-contexte)
+### 2. **Multi-process Management**
+- Interactive shell with commands to create, list, suspend and terminate processes
+- Each process has a unique PID and a state (RUNNING, SUSPENDED, ZOMBIE)
+- Ability to switch between processes without "background task" (single-context mode)
 
-### 3. **Ordonnanceur Round-Robin**
-- Implémentation d'un scheduler qui exécute les processus en alternance
-- Chaque processus obtient une "tranche de temps" (timeslice) avant de passer au suivant
-- Les processus suspendus sont ignorés par le scheduler
-- Affichage du temps CPU consommé par chaque processus
+### 3. **Round-Robin Scheduler**
+- Implementation of a scheduler that executes processes alternately
+- Each process gets a "time slice" (timeslice) before moving to the next one
+- Suspended processes are ignored by the scheduler
+- Display of CPU time consumed by each process
 
 ---
 
 ## Architecture
 
-### Composants principaux
+### Main Components
 
 #### `ProcessManager` (process_manager.h/cpp)
-- Gère la table des processus (max 8 processus simultanément)
-- États des processus : EMPTY, RUNNING, SUSPENDED, ZOMBIE
-- Méthodes :
-  - `createProcess()` : créer un nouveau processus
-  - `getProcess()` : récupérer un processus par PID
-  - `killProcess()` : terminer un processus
-  # Mini OS — Guide d'utilisation (version révisée)
+- Manages the process table (max 8 processes simultaneously)
+- Process states: EMPTY, RUNNING, SUSPENDED, ZOMBIE
+- Methods:
+  - `createProcess()`: create a new process
+  - `getProcess()`: retrieve a process by PID
+  - `killProcess()`: terminate a process
+  # Mini OS — User Guide (revised version)
 
-  **But**
+  **Purpose**
 
-  Fournir un mini noyau pédagogique pour STM32 (QEMU) permettant :
-  - d'exécuter plusieurs programmes utilisateur,
-  - d'arrêter les programmes bloquants (Ctrl+C ou `kill <pid>`),
-  - d'ordonnancer les processus (Round-Robin coopératif).
+  Provide a pedagogical mini kernel for STM32 (QEMU) allowing:
+  - to execute multiple user programs,
+  - to stop blocking programs (Ctrl+C or `kill <pid>`),
+  - to schedule processes (cooperative Round-Robin).
 
-  Ce guide explique l'utilisation et les scénarios de test rapides.
+  This guide explains the usage and quick test scenarios.
 
-  **Prérequis**
+  **Prerequisites**
 
-  - Compiler le projet avec PlatformIO depuis le dossier `OS-FunctionPrograms` :
+  - Compile the project with PlatformIO from the `OS-FunctionPrograms` folder:
     ```bash
     pio run
     ```
-  - Connectez-vous à la console série (115200) pour accéder au shell.
+  - Connect to the serial console (115200) to access the shell.
 
-  **Commandes principales du shell**
+  **Main Shell Commands**
 
-  - `list`        : afficher la liste des programmes disponibles (ID).
-  - `ps`          : afficher les processus actifs (PID, nom, état, CPU ms).
-  - `launch <id>` : lancer un programme en mode bloquant (mono-tâche).
-  - `start <id>`  : créer un processus (ajouté à la table et marqué RUNNING).
-  - `kill <pid>`  : demander l'arrêt coopératif d'un processus (marque ZOMBIE).
-  - `suspend <pid>` / `resume <pid>` : pause / reprise d'un processus.
-  - `run`         : lancer l'ordonnanceur Round-Robin (les processus RUNNING sont alternés).
-  - `help`        : afficher l'aide.
-  - `quit`        : arrêter le système.
+  - `list`: display the list of available programs (ID).
+  - `ps`: display active processes (PID, name, state, CPU ms).
+  - `launch <id>`: launch a program in blocking mode (single-task).
+  - `start <id>`: create a process (added to the table and marked RUNNING).
+  - `kill <pid>`: request cooperative stop of a process (marks ZOMBIE).
+  - `suspend <pid>` / `resume <pid>`: pause / resume a process.
+  - `run`: start the Round-Robin scheduler (RUNNING processes are alternated).
+  - `help`: display help.
+  - `quit`: stop the system.
 
-  Note : Ctrl+C (ASCII 3) envoyé depuis le terminal demande un arrêt global coopératif (équivalent à `kill` général).
+  Note: Ctrl+C (ASCII 3) sent from the terminal requests a global cooperative stop (equivalent to general `kill`).
 
-  **Scénarios rapides**
+  **Quick Scenarios**
 
-  - Lancer deux processus puis exécuter le scheduler :
+  - Launch two processes then execute the scheduler:
     1. `start 1` (prog2)
     2. `start 7` (infiniteLoop)
     3. `run`
 
-    `prog2` sera exécuté et finira, `infiniteLoop` tourne en arrière-plan. Appuyez Ctrl+C dans le terminal pour demander l'arrêt.
+    `prog2` will be executed and finish, `infiniteLoop` runs in the background. Press Ctrl+C in the terminal to request stop.
 
-  - Arrêter un processus bloquant :
-    1. `start 7` (crée infiniteLoop)
-    2. `ps` → noter le PID
-    3. `kill <pid>` → le processus lira le flag et sortira proprement
+  - Stop a blocking process:
+    1. `start 7` (creates infiniteLoop)
+    2. `ps` → note the PID
+    3. `kill <pid>` → the process will read the flag and exit cleanly
 
-  **Comportement du scheduler**
+  **Scheduler Behavior**
 
-  Le scheduler est coopératif : les programmes doivent appeler `kernel_yield()` régulièrement (ou utiliser `delay`) pour permettre au noyau de lire Ctrl+C et d'effectuer des opérations. `infiniteLoop` inclut désormais `kernel_yield()`.
+  The scheduler is cooperative: programs must call `kernel_yield()` regularly (or use `delay`) to allow the kernel to read Ctrl+C and perform operations. `infiniteLoop` now includes `kernel_yield()`.
 
   **Limitations**
 
-  - Pas de vraie préemption : le noyau ne sauvegarde pas le contexte matériel d'un programme. Pour une préemption complète il faudrait : SysTick + context switch + piles séparées.
-  - Pas d'isolation mémoire entre processus.
+  - No true preemption: the kernel does not save the hardware context of a program. For complete preemption it would require: SysTick + context switch + separate stacks.
+  - No memory isolation between processes.

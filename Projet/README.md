@@ -1,52 +1,52 @@
-# Projet : Cadavre Exquis
+# Project: Exquisite Corpse
 
-## 1. But du projet
+## 1. Project Goal
 
-L'objectif est de faire transiter un mot à travers 4 containers répartis sur 2 VMs Proxmox, en appliquant des transformations cryptographiques et une validation finale.
-Schéma de flux
+The objective is to pass a word through 4 containers distributed across 2 Proxmox VMs, applying cryptographic transformations and final validation.
+Flow Diagram
 
-    VM1 - C1 (Sourcing) : Entrée Utilisateur → Envoi TCP.
+    VM1 - C1 (Sourcing): User Input → TCP Send.
 
-    VM1 - C2 (Crypting) : César (+5) → Envoi TCP (via Bridge Vmbr1).
+    VM1 - C2 (Encrypting): Caesar (+5) → TCP Send (via Vmbr1 Bridge).
 
-    VM2 - C3 (Crypting) : XOR ("Nirvana") → Envoi TCP.
+    VM2 - C3 (Encrypting): XOR ("Nirvana") → TCP Send.
 
-    VM2 - C4 (Decrypting) : XOR ("Nirvana") + César (−5) → Envoi TCP.
+    VM2 - C4 (Decrypting): XOR ("Nirvana") + Caesar (−5) → TCP Send.
 
-## 2. Détails Techniques des Containers
+## 2. Container Technical Details
 
-| Étape | Localisation | Container | Action Principale | Transformation / Protocole | Destination |
+| Step | Location | Container | Main Action | Transformation / Protocol | Destination |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1. Source** | **VM1** | `c1_initiator` | Sélection du mot | Entrée utilisateur | `c2_caesar` (VM1) |
-| **2. Chiffrement Cesar** | **VM1** | `c2_caesar` | Chiffrement | César (+5) | `c3_xor` (VM2) |
-| **4. Chiffrement XOR**| **VM2** | `c3_xor` | Chiffrement | XOR ("nirvana") | `c4_decipher` (VM2) |
-| **5. Déchiffrement + envoie**| **VM2** | `c4_decipher` | Déchiffrement + envoie | XOR("nirvana") -> César(-5) | `c1_initiator` (VM1) |
+| **1. Source** | **VM1** | `c1_initiator` | Word selection | User input | `c2_caesar` (VM1) |
+| **2. Caesar Encryption** | **VM1** | `c2_caesar` | Encryption | Caesar (+5) | `c3_xor` (VM2) |
+| **4. XOR Encryption**| **VM2** | `c3_xor` | Encryption | XOR ("nirvana") | `c4_decipher` (VM2) |
+| **5. Decryption + send**| **VM2** | `c4_decipher` | Decryption + send | XOR("nirvana") -> Caesar(-5) | `c1_initiator` (VM1) |
 
----  
+---
 
-Il y a en tout 4 relais : 
+There are 4 relays in total:
 
-| Service | Port Écouté | Protocole | Type de Donnée |
+| Service | Listening Port | Protocol | Data Type |
 | :--- | :--- | :--- | :--- |
-| **Relais clair** | `5000` | TCP | Binaire (Bytes) |
-| **Relais chiffré Cesar** | `5001` | TCP | Chaîne (String) |
-| **Relais chiffré XOR** | `5002` | TCP | Chaîne (String) |
-| **Retour déchiffré en clair** | `5003` | TCP | Binaire (Bytes) |
+| **Clear relay** | `5000` | TCP | Binary (Bytes) |
+| **Caesar encrypted relay** | `5001` | TCP | String (String) |
+| **XOR encrypted relay** | `5002` | TCP | String (String) |
+| **Clear decrypted return** | `5003` | TCP | Binary (Bytes) |
 
 ---
 
 -----------------------------------------------------------------
 
-## 3. Logique de Communication (Protocole TCP)
+## 3. Communication Logic (TCP Protocol)
 
-Bien que l'UDP soit possible, le TCP est recommandé ici car le chiffrement XOR sur des flux binaires supporte mal la perte de paquets ou le désordre.
+Although UDP is possible, TCP is recommended here because XOR encryption on binary streams does not handle packet loss or disorder well.
 
 ---
 
 ## Notes
 
-- VM1 : Linux sans interface graphique
-- VM2 : Linux avec interface graphique
-- Le projet repose entièrement sur Docker, TCP et des transformations cryptographiques simples.
+- VM1: Linux without graphical interface
+- VM2: Linux with graphical interface
+- The project relies entirely on Docker, TCP, and simple cryptographic transformations.
 
 

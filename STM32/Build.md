@@ -1,53 +1,53 @@
-# Construction STM32
+# STM32 Build
 
-## Prérequis
+## Prerequisites
 
-Pour réaliser cette partie, nous allons avoir besoin des outils suivants : 
+To complete this section, we will need the following tools:
   - Docker
   - Socat
-    - Utile pour connecter des applications à l'intérieur de boîtes séparées
-  - ssh ( pour faciliter l'utilisation de la VM
-      - Permet de faire des copier-coller plus facilement
-  - GIT ( qui va nous permettre d'utiliser les ressources de ce TP )
+    - Useful for connecting applications inside separate containers
+  - ssh (to facilitate VM usage)
+      - Allows easier copy-paste operations
+  - GIT (which will allow us to use the resources for this lab)
 
-Nous allons commencer par cloner le dépôt git, sur lequel les ressources pour le TP sont présentes, avec la commande : 
+We will start by cloning the git repository, which contains the resources for the lab, with the command:
 ```
 git clone https://forgens.univ-ubs.fr/gitlab/charton/virtos.git
 ```
-Enfin, nous allons aller dans le dossier **/virtos/Ressource_OS_STM32/docker** pour construire le stm32 
+Finally, we will go to the **/virtos/Ressource_OS_STM32/docker** folder to build the stm32
 
 -------------------------------------------------------------------------------------------------------------------------------------
 
-## BUILD CONTAINER PlatformIO
+## BUILD PlatformIO CONTAINER
 
 ```
 docker build -t stm32-qemu .
 ```
-Une fois le conteneur créé, nous allons utiliser le réseau pour nous connecter sur ce conteneur via le port 4444. On va également monter tout le répertoire de ressources dessus.
+Once the container is created, we will use the network to connect to this container via port 4444. We will also mount the entire resources directory on it.
 
 ```
 docker run --name stm32 -it -v $(pwd)/..:/workspace -p 4444:4444 stm32-qemu
 ```
-Une fois le conteneur quitté, il est possible de retourner dessus en utilisant la commande : 
+Once the container is exited, it is possible to return to it using the command:
 
 ```
 docker start -ai stm32
 ```
 -------------------------------------------------------------------------------------------------------------------------------------
 
-## BUILD FirmwareSTM32 (à faire depuis le conteneur )
-Nous allons désormais monter le firmware du stm32 depuis le conteneur installé. Pour ce faire, nous allons nous rendre dans le dossier **/OS-FunctionPrograms** et lancer la commande suivante : 
+## BUILD STM32 Firmware (to be done from the container)
+We will now build the stm32 firmware from the installed container. To do this, we will go to the **/OS-FunctionPrograms** folder and run the following command:
 
 ```
-pio run -t clean && pio run
+ pio run -t clean && pio run
 ```
-Un message affichant "LED Off" s'affichera si tout se passe bien.
+A message displaying "LED Off" will appear if everything goes well.
 
 -------------------------------------------------------------------------------------------------------------------------------------
 
-## Accès STM32 (depuis la machine hôte)
+## STM32 Access (from the host machine)
 
-Pour accéder au STM32 depuis la machine hôte, nous allons exécuter la commande suivante : 
+To access the STM32 from the host machine, we will execute the following command:
 
 ```
 socat -,raw,echo=0 tcp:localhost:4444

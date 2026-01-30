@@ -1,22 +1,22 @@
-# Génération de zombies
+# Zombie Generation
 
-Dans un programme zombie_generator.c --> on crée des zombies à intervalle régulier (2s)
-Il y a une fonction qui crée les zombies, un handler qui permet de créer la commande USR1 pour tuer les zombies
+In a zombie_generator.c program --> we create zombies at regular intervals (2s)
+There is a function that creates the zombies, a handler that allows creating the USR1 command to kill the zombies
 
-## Pour compiler le programme :
-
-```
-gcc -Wall -O2 -o zombie_manager zombie_manager.c   
-```
-
-## Pour afficher les processus
+## To compile the program:
 
 ```
-ps --ppid <PID_DU_PROGRAMME> -o pid,ppid,stat,cmd
+gcc -Wall -O2 -o zombie_manager zombie_manager.c
 ```
 
-## Pour kill les processus zombie : 
+## To display the processes
 
 ```
-kill -USR1 <PID_DU_PROGRAMME>
+ps --ppid <PROGRAM_PID> -o pid,ppid,stat,cmd
+```
+
+## To kill zombie processes:
+
+```
+kill -USR1 <PROGRAM_PID>
 ```
